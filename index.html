@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bertazo | Sistema de Gestão</title>
     
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💼</text></svg>">
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -12,71 +14,54 @@
         :root { --bordo: #800020; --gold: #b8860b; --bg: #f0f2f5; --text: #333; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* UTILITÁRIOS */
         .hidden { display: none !important; }
-        .btn { background: var(--bordo); color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; width: 100%; }
+        .btn { background: var(--bordo); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; transition: 0.2s; }
         .btn:hover { background: #5a0016; }
-        .btn-outline { background: transparent; border: 1px solid white; color: white; width: auto; }
-        input, select, textarea { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
         
-        /* TELA DE LOGIN */
-        #login-flow { position: fixed; inset: 0; background: var(--bordo); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .login-box { background: white; padding: 40px; border-radius: 12px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        .login-logo { font-size: 24px; font-weight: bold; color: var(--bordo); margin-bottom: 5px; letter-spacing: 2px; }
-        .login-sub { font-size: 14px; color: #666; margin-bottom: 25px; }
-        #login-msg { color: #d32f2f; font-size: 13px; margin-top: 10px; min-height: 20px; }
-
-        /* APLICAÇÃO PRINCIPAL */
-        header { background: var(--bordo); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-bottom: 4px solid var(--gold); }
+        /* LOGIN */
+        #login-screen { position: fixed; inset: 0; background: var(--bordo); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        
+        /* APP */
+        header { background: var(--bordo); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--gold); }
         nav { background: white; padding: 10px; display: flex; justify-content: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        nav button { background: none; border: none; padding: 10px 20px; color: #666; font-weight: bold; cursor: pointer; border-radius: 4px; }
-        nav button.active { background: #fff0f3; color: var(--bordo); }
+        nav button { background: none; border: none; padding: 10px 15px; color: #666; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        nav button.active { background: #fff0f3; color: var(--bordo); border-bottom: 2px solid var(--bordo); }
 
-        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; flex: 1; }
-        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid var(--bordo); }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; flex: 1; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 3px solid var(--bordo); }
         
-        /* BI & KPIS */
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .kpi-box { background: white; padding: 20px; border-radius: 8px; text-align: center; border-bottom: 3px solid var(--gold); }
-        .kpi-val { font-size: 24px; font-weight: bold; color: var(--bordo); margin-top: 5px; }
         
-        /* LISTAS */
-        .cli-item { background: white; border-left: 5px solid var(--gold); padding: 15px; margin-bottom: 10px; border-radius: 4px; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .cli-actions { position: absolute; top: 15px; right: 15px; }
-        .badge { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #555; text-transform: uppercase; }
-        
-        /* Mobile Responsividade */
-        @media(max-width: 600px) { .grid-form { grid-template-columns: 1fr !important; } }
         .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        @media(max-width: 600px) { .grid-form { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-    <div id="login-flow">
+    <div id="login-screen">
         <div class="login-box">
-            <div class="login-logo">BERTAZO</div>
-            <div class="login-sub">Gestão Estratégica & BI</div>
-            
-            <form onsubmit="event.preventDefault(); handleLogin();">
-                <input type="email" id="email" placeholder="E-mail" required>
-                <input type="password" id="password" placeholder="Senha" required>
-                <button type="submit" id="btn-login" class="btn">ACESSAR SISTEMA</button>
-            </form>
-            
-            <div id="login-msg"></div>
+            <h2 style="color:var(--bordo); margin:0 0 10px 0;">BERTAZO</h2>
+            <p style="color:#666; font-size:14px;">Gestão Estratégica</p>
+            <input type="email" id="email" placeholder="E-mail">
+            <input type="password" id="password" placeholder="Senha">
+            <button class="btn" onclick="fazerLogin()" id="btn-entrar">ENTRAR</button>
+            <p id="msg-erro" style="color:red; font-size:12px; margin-top:10px;"></p>
         </div>
     </div>
 
-    <div id="app-flow" class="hidden">
+    <div id="app" class="hidden">
         <header>
-            <div><strong>BERTAZO</strong> | PAINEL</div>
-            <button onclick="handleLogout()" class="btn btn-outline" style="font-size: 12px; padding: 5px 15px;">SAIR</button>
+            <div style="font-weight:bold; letter-spacing:1px;">BERTAZO</div>
+            <button onclick="sair()" style="background:transparent; border:1px solid white; color:white; padding:5px 15px; border-radius:4px; cursor:pointer;">SAIR</button>
         </header>
 
         <nav>
-            <button id="nav-bi" class="active" onclick="switchTab('bi')">DASHBOARD BI</button>
-            <button id="nav-cli" onclick="switchTab('cli')">CLIENTES</button>
-            <button id="nav-fat" onclick="switchTab('fat')">FATURAMENTO</button>
+            <button id="nav-bi" class="active" onclick="mudarAba('bi')">DASHBOARD</button>
+            <button id="nav-cli" onclick="mudarAba('cli')">CLIENTES</button>
+            <button id="nav-fat" onclick="mudarAba('fat')">FATURAMENTO</button>
         </nav>
 
         <div class="container">
@@ -84,82 +69,70 @@
             <section id="tab-bi">
                 <div class="kpi-grid">
                     <div class="kpi-box">
-                        <small>FATURAMENTO</small>
-                        <div id="kpi-total" class="kpi-val">R$ 0,00</div>
+                        <small style="color:#888; font-weight:bold;">FATURAMENTO</small>
+                        <div id="kpi-total" style="font-size:24px; font-weight:bold; color:var(--bordo);">R$ 0,00</div>
                     </div>
                     <div class="kpi-box">
-                        <small>TICKET MÉDIO</small>
-                        <div id="kpi-ticket" class="kpi-val">R$ 0,00</div>
-                    </div>
-                    <div class="kpi-box">
-                        <small>MÊS REFERÊNCIA</small><br>
-                        <input type="month" id="bi-mes" onchange="loadDashboard()" style="width: auto; margin: 5px 0 0 0; border: none; font-weight: bold; color: var(--bordo);">
+                        <small style="color:#888; font-weight:bold;">MÊS REFERÊNCIA</small><br>
+                        <input type="month" id="bi-mes" onchange="carregarBI()" style="width:auto; margin:5px 0 0 0; border:none; font-weight:bold; color:var(--bordo);">
                     </div>
                 </div>
-
-                <div class="card" style="padding: 15px;">
-                    <label style="font-size: 12px; font-weight: bold;">FILTRAR GRÁFICOS POR REPRESENTADA:</label>
-                    <select id="bi-rep-filter" onchange="loadDashboard()" style="margin-bottom: 0;">
-                        <option value="">Todas as Representadas</option>
+                <div class="card">
+                    <label style="font-size:12px; font-weight:bold;">FILTRAR REPRESENTADA:</label>
+                    <select id="bi-rep" onchange="carregarBI()" style="margin-bottom:0;">
+                        <option value="">Todas</option>
                         <option>PLAXMETAL PR</option><option>PLAXMETAL MS/MT</option>
                         <option>LUNASA</option><option>GEBB</option><option>ARIAM</option>
                     </select>
                 </div>
-
                 <div class="card">
-                    <canvas id="chart-evolution" height="80"></canvas>
+                    <canvas id="grafico-vendas"></canvas>
                 </div>
             </section>
 
             <section id="tab-cli" class="hidden">
                 <div class="card">
-                    <h3 style="margin-top:0; color:var(--bordo)">Nova Ficha de Cliente</h3>
+                    <h3>Novo Cliente (Ficha Completa)</h3>
                     <div class="grid-form">
                         <input type="text" id="c-nome" placeholder="Razão Social *">
-                        <input type="text" id="c-cnpj" placeholder="CNPJ / CPF">
+                        <input type="text" id="c-cnpj" placeholder="CNPJ">
                     </div>
                     <div class="grid-form">
                         <select id="c-rep">
                             <option>PLAXMETAL PR</option><option>PLAXMETAL MS/MT</option>
                             <option>LUNASA</option><option>GEBB</option><option>ARIAM</option>
                         </select>
-                        <input type="text" id="c-contato" placeholder="Nome do Contato">
+                        <input type="text" id="c-contato" placeholder="Contato">
                     </div>
                     <div class="grid-form">
-                        <input type="text" id="c-whats" placeholder="WhatsApp / Telefone">
-                        <input type="text" id="c-end" placeholder="Cidade / Estado">
+                        <input type="text" id="c-whats" placeholder="WhatsApp">
+                        <input type="text" id="c-end" placeholder="Endereço / Cidade">
                     </div>
-                    <textarea id="c-obs" placeholder="Observações Gerais..." rows="3"></textarea>
-                    <button class="btn" onclick="saveClient()">SALVAR FICHA</button>
+                    <textarea id="c-obs" placeholder="Observações..." rows="2"></textarea>
+                    <button class="btn" onclick="salvarCliente()">SALVAR FICHA</button>
                 </div>
-
-                <div class="card" style="background: #fafafa; border: 1px solid #eee;">
-                    <input type="text" id="c-search" placeholder="🔍 Buscar cliente..." oninput="renderClients()" style="margin-bottom: 0;">
-                </div>
-
-                <div id="list-clients"></div>
+                <div id="lista-clientes"></div>
             </section>
 
             <section id="tab-fat" class="hidden">
                 <div class="card">
-                    <h3 style="margin-top:0; color:var(--bordo)">Lançar Venda</h3>
+                    <h3>Lançar Venda</h3>
                     <div class="grid-form">
                         <input type="date" id="v-data">
-                        <input type="number" id="v-valor" placeholder="Valor R$">
+                        <input type="number" id="v-valor" placeholder="Valor (R$)">
                     </div>
                     <div class="grid-form">
-                        <input type="text" id="v-cliente" placeholder="Nome do Cliente">
+                        <input type="text" id="v-cli" placeholder="Nome do Cliente">
                         <input type="text" id="v-nf" placeholder="Nota Fiscal">
                     </div>
                     <select id="v-rep">
                         <option>PLAXMETAL PR</option><option>PLAXMETAL MS/MT</option>
                         <option>LUNASA</option><option>GEBB</option><option>ARIAM</option>
                     </select>
-                    <button class="btn" onclick="saveSale()">REGISTRAR VENDA</button>
+                    <button class="btn" onclick="salvarVenda()">REGISTRAR VENDA</button>
                 </div>
-
                 <div class="card">
-                    <div id="list-sales"></div>
+                    <table style="width:100%; border-collapse:collapse;" id="tabela-vendas"></table>
                 </div>
             </section>
 
@@ -167,82 +140,110 @@
     </div>
 
     <script>
-        // --- 1. CONFIGURAÇÃO (PREENCHA AQUI) ---
-        const SUPABASE_URL = "https://bertazo.github.io/sistema/";
-        const SUPABASE_KEY = "sb_publishable_89VYMYncTckOQdDyiKXpuQ_AewcuCE4";
-        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // Variáveis Globais
+        // --- CONFIGURAÇÃO ---
+        const SB_URL = "https://abjqrorlzkmbtiqoooxb.supabase.co";
+        const SB_KEY = "Ssb_publishable_89VYMYncTckOQdDyiKXpuQ_AewcuCE4";
+        const sb = supabase.createClient(SB_URL, SB_KEY);
         let chartInstance = null;
-        let clientsCache = [];
 
-        // --- 2. SISTEMA DE LOGIN (AUTH) ---
-        
-        // Ouve se o usuário entrou ou saiu
-        sb.auth.onAuthStateChange((event, session) => {
+        // --- SISTEMA DE LOGIN INTELIGENTE ---
+        // Verifica se já existe login ao abrir a página
+        window.onload = async () => {
+            const { data: { session } } = await sb.auth.getSession();
             if (session) {
-                // Usuário logado: Esconde login, Mostra app
-                document.getElementById('login-flow').classList.add('hidden');
-                document.getElementById('app-flow').classList.remove('hidden');
-                initApp(); // Carrega os dados
+                mostrarApp();
             } else {
-                // Usuário deslogado: Mostra login, Esconde app
-                document.getElementById('login-flow').classList.remove('hidden');
-                document.getElementById('app-flow').classList.add('hidden');
+                document.getElementById('login-screen').classList.remove('hidden');
             }
-        });
+        };
 
-        async function handleLogin() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const msg = document.getElementById('login-msg');
-            const btn = document.getElementById('btn-login');
-
+        async function fazerLogin() {
+            const btn = document.getElementById('btn-entrar');
+            const msg = document.getElementById('msg-erro');
+            btn.innerText = "Entrando...";
             btn.disabled = true;
-            btn.innerText = "Verificando...";
-            msg.innerText = "";
 
-            const { data, error } = await sb.auth.signInWithPassword({ email, password });
+            const { data, error } = await sb.auth.signInWithPassword({
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            });
 
             if (error) {
+                msg.innerText = "Erro: " + error.message;
+                btn.innerText = "ENTRAR";
                 btn.disabled = false;
-                btn.innerText = "ACESSAR SISTEMA";
-                msg.innerText = "Erro: Verifique e-mail e senha.";
-                console.error(error);
+            } else {
+                mostrarApp();
             }
-            // Se der certo, o onAuthStateChange vai lidar com a troca de tela automaticamente
         }
 
-        async function handleLogout() {
+        async function sair() {
             await sb.auth.signOut();
-            window.location.reload();
+            location.reload();
         }
 
-        // --- 3. INICIALIZAÇÃO E DADOS ---
-
-        function initApp() {
+        function mostrarApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            // Inicia valores padrão
             document.getElementById('bi-mes').value = new Date().toISOString().slice(0, 7);
             document.getElementById('v-data').valueAsDate = new Date();
-            loadClients();
-            loadSales();
-            loadDashboard();
+            carregarBI();
+            carregarClientes();
+            carregarVendas();
         }
 
-        function switchTab(tabName) {
-            // Esconde todas as seções
-            document.querySelectorAll('section').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
-            
-            // Mostra a escolhida
-            document.getElementById('tab-' + tabName).classList.remove('hidden');
-            document.getElementById('nav-' + tabName).classList.add('active');
+        // --- FUNÇÕES DE VENDAS ---
+        async function salvarVenda() {
+            const valor = document.getElementById('v-valor').value;
+            const cliente = document.getElementById('v-cli').value;
+
+            if (!valor || !cliente) return alert("Preencha Valor e Cliente!");
+
+            const { error } = await sb.from('vendas').insert([{
+                data_venda: document.getElementById('v-data').value,
+                cliente_nome: cliente,
+                valor: parseFloat(valor),
+                nf: document.getElementById('v-nf').value,
+                representada: document.getElementById('v-rep').value
+            }]);
+
+            if (error) {
+                alert("Erro ao salvar venda: " + error.message);
+                console.error(error); // Mostra o erro real no console se houver
+            } else {
+                alert("Venda Registrada!");
+                document.getElementById('v-valor').value = '';
+                document.getElementById('v-nf').value = '';
+                carregarVendas();
+                carregarBI();
+            }
         }
 
-        // --- 4. FUNÇÕES DE CLIENTES ---
-        
-        async function saveClient() {
+        async function carregarVendas() {
+            const { data } = await sb.from('vendas').select('*').order('data_venda', {ascending: false}).limit(20);
+            const tabela = document.getElementById('tabela-vendas');
+            tabela.innerHTML = `
+                <tr style="background:#eee; text-align:left;">
+                    <th style="padding:10px">Data</th><th>Cliente</th><th>Valor</th><th></th>
+                </tr>
+            `;
+            data?.forEach(v => {
+                tabela.innerHTML += `
+                    <tr style="border-bottom:1px solid #ddd">
+                        <td style="padding:10px">${v.data_venda.split('-').reverse().join('/')}</td>
+                        <td>${v.cliente_nome}<br><small>${v.representada}</small></td>
+                        <td style="color:var(--bordo); font-weight:bold">R$ ${v.valor.toLocaleString('pt-BR')}</td>
+                        <td><button onclick="deletar('vendas','${v.id}')" style="color:red; border:none; background:none; cursor:pointer">X</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // --- FUNÇÕES DE CLIENTES ---
+        async function salvarCliente() {
             const nome = document.getElementById('c-nome').value;
-            if(!nome) return alert("O nome da Razão Social é obrigatório.");
+            if(!nome) return alert("Preencha a Razão Social");
 
             const { error } = await sb.from('clientes').insert([{
                 nome: nome,
@@ -254,150 +255,74 @@
                 observacoes: document.getElementById('c-obs').value
             }]);
 
-            if(error) alert("Erro ao salvar: " + error.message);
+            if(error) alert("Erro: " + error.message);
             else {
-                alert("Cliente salvo com sucesso!");
-                // Limpa campos
-                document.querySelectorAll('#tab-cli input, #tab-cli textarea').forEach(i => i.value = '');
-                loadClients();
+                alert("Cliente Salvo!");
+                document.querySelectorAll('#tab-cli input').forEach(i => i.value = '');
+                carregarClientes();
             }
         }
 
-        async function loadClients() {
+        async function carregarClientes() {
             const { data } = await sb.from('clientes').select('*').order('nome');
-            clientsCache = data || [];
-            renderClients();
-        }
-
-        function renderClients() {
-            const term = document.getElementById('c-search').value.toLowerCase();
-            const list = document.getElementById('list-clients');
-            list.innerHTML = "";
-
-            const filtered = clientsCache.filter(c => c.nome.toLowerCase().includes(term));
-
-            filtered.forEach(c => {
-                list.innerHTML += `
-                    <div class="cli-item">
-                        <div class="cli-actions">
-                            <button onclick="deleteItem('clientes', '${c.id}')" style="color:red; border:none; background:none; cursor:pointer; font-size:18px;">&times;</button>
+            const lista = document.getElementById('lista-clientes');
+            lista.innerHTML = '';
+            data?.forEach(c => {
+                lista.innerHTML += `
+                    <div class="card" style="border-left:5px solid var(--gold); border-top:none;">
+                        <div style="display:flex; justify-content:space-between">
+                            <strong>${c.nome}</strong>
+                            <button onclick="deletar('clientes','${c.id}')" style="color:red; border:none; background:none; cursor:pointer">🗑️</button>
                         </div>
-                        <span class="badge">${c.representada}</span>
-                        <h3 style="margin: 5px 0; color: var(--bordo);">${c.nome}</h3>
-                        <div style="font-size: 13px; color: #555; line-height: 1.6;">
-                            <strong>CNPJ:</strong> ${c.cnpj || '-'} <br>
-                            <strong>Contato:</strong> ${c.contato || '-'} | <strong>WhatsApp:</strong> ${c.whatsapp || '-'} <br>
-                            <strong>Local:</strong> ${c.endereco || '-'}
-                        </div>
-                        ${c.observacoes ? `<div style="margin-top:8px; background:#f9f9f9; padding:8px; border-radius:4px; font-size:12px; color:#666;">📝 ${c.observacoes}</div>` : ''}
+                        <small style="background:#eee; padding:2px 5px; border-radius:4px;">${c.representada}</small>
+                        <p style="font-size:13px; color:#555; margin:5px 0">
+                            📞 ${c.contato || '-'} | ${c.whatsapp || '-'}<br>
+                            📍 ${c.endereco || '-'}
+                        </p>
                     </div>
                 `;
             });
         }
 
-        // --- 5. FUNÇÕES DE VENDAS E BI ---
-
-        async function saveSale() {
-            const valor = document.getElementById('v-valor').value;
-            const cliente = document.getElementById('v-cliente').value;
-            
-            if(!valor || !cliente) return alert("Preencha Cliente e Valor.");
-
-            await sb.from('vendas').insert([{
-                data_venda: document.getElementById('v-data').value,
-                cliente_nome: cliente,
-                representada: document.getElementById('v-rep').value,
-                valor: parseFloat(valor),
-                nf: document.getElementById('v_nf').value
-            }]);
-
-            // Limpa parciais
-            document.getElementById('v-valor').value = "";
-            document.getElementById('v-nf').value = "";
-            loadSales();
-            loadDashboard();
-        }
-
-        async function loadSales() {
-            // Carrega apenas as últimas 50 vendas para a lista de faturamento não ficar pesada
-            const { data } = await sb.from('vendas').select('*').order('data_venda', {ascending: false}).limit(50);
-            const list = document.getElementById('list-sales');
-            
-            let html = '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
-            html += '<tr style="background:#eee; text-align:left;"> <th style="padding:10px;">Data</th> <th>Cliente</th> <th>Valor</th> <th></th> </tr>';
-            
-            data?.forEach(v => {
-                html += `
-                    <tr style="border-bottom:1px solid #eee;">
-                        <td style="padding:10px;">${v.data_venda.split('-').reverse().join('/')}</td>
-                        <td>${v.cliente_nome}<br><small style="color:#888">${v.representada}</small></td>
-                        <td style="font-weight:bold; color:var(--bordo)">R$ ${v.valor.toLocaleString('pt-BR')}</td>
-                        <td style="text-align:right;"><button onclick="deleteItem('vendas', '${v.id}')" style="color:red; border:none; background:none; cursor:pointer;">&times;</button></td>
-                    </tr>
-                `;
-            });
-            list.innerHTML = html + '</table>';
-        }
-
-        async function loadDashboard() {
+        // --- BI E UTILITÁRIOS ---
+        async function carregarBI() {
             const mes = document.getElementById('bi-mes').value;
-            const repFilter = document.getElementById('bi-rep-filter').value;
+            const rep = document.getElementById('bi-rep').value;
+            let query = sb.from('vendas').select('*').gte('data_venda', `${mes}-01`).lte('data_venda', `${mes}-31`);
             
-            // Query base: Pega o mês inteiro
-            let query = sb.from('vendas').select('*')
-                .gte('data_venda', `${mes}-01`)
-                .lte('data_venda', `${mes}-31`);
-            
-            // Aplica filtro de representada se selecionado
-            if(repFilter) {
-                query = query.eq('representada', repFilter);
-            }
+            if(rep) query = query.eq('representada', rep);
 
             const { data } = await query;
-            if(!data) return;
-
-            // Cálculos
-            const total = data.reduce((acc, curr) => acc + curr.valor, 0);
-            const ticket = data.length > 0 ? total / data.length : 0;
-
+            const total = data?.reduce((acc, v) => acc + v.valor, 0) || 0;
+            
             document.getElementById('kpi-total').innerText = total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
-            document.getElementById('kpi-ticket').innerText = ticket.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
 
             // Gráfico
             const dias = {};
-            data.forEach(v => {
-                dias[v.data_venda] = (dias[v.data_venda] || 0) + v.valor;
-            });
-            
-            // Ordenar dias
-            const sortedDias = Object.keys(dias).sort();
-            
+            data?.forEach(v => dias[v.data_venda] = (dias[v.data_venda]||0) + v.valor);
+            const labels = Object.keys(dias).sort().map(d => d.split('-')[2]);
+            const valores = Object.keys(dias).sort().map(d => dias[d]);
+
             if(chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(document.getElementById('chart-evolution'), {
+            chartInstance = new Chart(document.getElementById('grafico-vendas'), {
                 type: 'line',
-                data: {
-                    labels: sortedDias.map(d => d.split('-')[2]), // Apenas o dia
-                    datasets: [{
-                        label: 'Vendas (R$)',
-                        data: sortedDias.map(d => dias[d]),
-                        borderColor: '#800020',
-                        backgroundColor: 'rgba(128, 0, 32, 0.1)',
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { display: false } } }
+                data: { labels: labels, datasets: [{ label: 'Vendas', data: valores, borderColor: '#800020', tension:0.3, fill:true, backgroundColor:'rgba(128,0,32,0.1)' }] }
             });
         }
 
-        async function deleteItem(table, id) {
-            if(confirm("Tem certeza que deseja excluir?")) {
-                await sb.from(table).delete().eq('id', id);
-                // Recarrega tudo para garantir sincronia
-                initApp();
+        async function deletar(tabela, id) {
+            if(confirm("Excluir?")) {
+                await sb.from(tabela).delete().eq('id', id);
+                location.reload();
             }
+        }
+
+        function mudarAba(aba) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + aba).classList.remove('hidden');
+            document.getElementById('nav-' + aba).classList.add('active');
         }
     </script>
 </body>
-
 </html>
