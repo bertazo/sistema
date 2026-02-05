@@ -3,328 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bertazo | Sistema de Gestão</title>
-    
+    <title>Bertazo | Gestão</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💼</text></svg>">
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <style>
-        :root { --bordo: #800020; --gold: #b8860b; --bg: #f0f2f5; --text: #333; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
-        
+        :root { --bordo: #800020; --gold: #b8860b; --bg: #f4f4f9; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; }
         .hidden { display: none !important; }
-        .btn { background: var(--bordo); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; transition: 0.2s; }
-        .btn:hover { background: #5a0016; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
         
         /* LOGIN */
-        #login-screen { position: fixed; inset: 0; background: var(--bordo); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .login-box { background: white; padding: 40px; border-radius: 12px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        #login-screen { position: fixed; inset: 0; background: var(--bordo); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .login-card { background: white; padding: 40px; border-radius: 15px; width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
-        /* APP */
-        header { background: var(--bordo); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--gold); }
-        nav { background: white; padding: 10px; display: flex; justify-content: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        nav button { background: none; border: none; padding: 10px 15px; color: #666; font-weight: bold; cursor: pointer; border-radius: 4px; }
-        nav button.active { background: #fff0f3; color: var(--bordo); border-bottom: 2px solid var(--bordo); }
+        /* HEADER & NAV */
+        header { background: var(--bordo); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--gold); }
+        nav { background: white; display: flex; justify-content: center; border-bottom: 1px solid #ddd; }
+        nav button { background: none; border: none; padding: 15px 25px; cursor: pointer; font-weight: bold; color: #666; transition: 0.3s; }
+        nav button.active { color: var(--bordo); border-bottom: 3px solid var(--bordo); background: #fff5f7; }
 
-        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; flex: 1; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 3px solid var(--bordo); }
+        .container { max-width: 1000px; margin: 20px auto; padding: 0 20px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid var(--bordo); }
         
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .kpi-box { background: white; padding: 20px; border-radius: 8px; text-align: center; border-bottom: 3px solid var(--gold); }
-        
-        .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        @media(max-width: 600px) { .grid-form { grid-template-columns: 1fr; } }
+        /* FORMULÁRIOS */
+        .row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+        .row > div { flex: 1; min-width: 200px; }
+        input, select, textarea { padding: 12px; border: 1px solid #ddd; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 14px; margin-top: 5px; }
+        label { font-size: 12px; font-weight: bold; color: #555; text-transform: uppercase; }
+        .btn { background: var(--bordo); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
+        .btn:hover { background: #5a0016; transform: translateY(-2px); }
+
+        /* TABELA DE FATURAMENTO */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; color: #888; font-size: 12px; padding: 10px; border-bottom: 2px solid #eee; }
+        td { padding: 12px 10px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+        .val-venda { font-weight: bold; color: var(--bordo); }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="login-box">
-            <h2 style="color:var(--bordo); margin:0 0 10px 0;">BERTAZO</h2>
-            <p style="color:#666; font-size:14px;">Gestão Estratégica</p>
-            <input type="email" id="email" placeholder="E-mail">
-            <input type="password" id="password" placeholder="Senha">
-            <button class="btn" onclick="fazerLogin()" id="btn-entrar">ENTRAR</button>
-            <p id="msg-erro" style="color:red; font-size:12px; margin-top:10px;"></p>
-        </div>
+<div id="login-screen">
+    <div class="login-card">
+        <h1 style="color:var(--bordo); margin:0;">BERTAZO</h1>
+        <p style="font-size:12px; margin-bottom:20px;">ACESSO RESTRITO</p>
+        <input type="email" id="email" placeholder="E-mail">
+        <input type="password" id="pass" placeholder="Senha">
+        <button class="btn" onclick="login()">ENTRAR</button>
     </div>
+</div>
 
-    <div id="app" class="hidden">
-        <header>
-            <div style="font-weight:bold; letter-spacing:1px;">BERTAZO</div>
-            <button onclick="sair()" style="background:transparent; border:1px solid white; color:white; padding:5px 15px; border-radius:4px; cursor:pointer;">SAIR</button>
-        </header>
+<div id="app" class="hidden">
+    <header>
+        <div style="font-weight: bold; letter-spacing: 1px;">BERTAZO | GESTÃO</div>
+        <button onclick="logout()" style="background:none; border:1px solid white; color:white; padding:5px 12px; border-radius:4px; cursor:pointer; font-size:11px;">SAIR</button>
+    </header>
 
-        <nav>
-            <button id="nav-bi" class="active" onclick="mudarAba('bi')">DASHBOARD</button>
-            <button id="nav-cli" onclick="mudarAba('cli')">CLIENTES</button>
-            <button id="nav-fat" onclick="mudarAba('fat')">FATURAMENTO</button>
-        </nav>
+    <nav>
+        <button id="n-bi" class="active" onclick="tab('bi')">DASHBOARD BI</button>
+        <button id="n-cli" onclick="tab('cli')">CLIENTES</button>
+        <button id="n-fat" onclick="tab('fat')">FATURAMENTO</button>
+    </nav>
 
-        <div class="container">
-            
-            <section id="tab-bi">
-                <div class="kpi-grid">
-                    <div class="kpi-box">
-                        <small style="color:#888; font-weight:bold;">FATURAMENTO</small>
-                        <div id="kpi-total" style="font-size:24px; font-weight:bold; color:var(--bordo);">R$ 0,00</div>
-                    </div>
-                    <div class="kpi-box">
-                        <small style="color:#888; font-weight:bold;">MÊS REFERÊNCIA</small><br>
-                        <input type="month" id="bi-mes" onchange="carregarBI()" style="width:auto; margin:5px 0 0 0; border:none; font-weight:bold; color:var(--bordo);">
-                    </div>
+    <div class="container">
+        <section id="s-bi">
+            <div class="row">
+                <div class="card" style="text-align:center">
+                    <label>Faturamento Mensal</label>
+                    <div id="tot-mes" style="font-size:28px; font-weight:bold; color:var(--bordo); margin-top:5px;">R$ 0,00</div>
                 </div>
-                <div class="card">
-                    <label style="font-size:12px; font-weight:bold;">FILTRAR REPRESENTADA:</label>
-                    <select id="bi-rep" onchange="carregarBI()" style="margin-bottom:0;">
-                        <option value="">Todas</option>
-                        <option>PLAXMETAL PR</option><option>PLAXMETAL MS/MT</option>
-                        <option>LUNASA</option><option>GEBB</option><option>ARIAM</option>
-                    </select>
-                </div>
-                <div class="card">
-                    <canvas id="grafico-vendas"></canvas>
-                </div>
-            </section>
-
-            <section id="tab-cli" class="hidden">
-                <div class="card">
-                    <h3>Novo Cliente (Ficha Completa)</h3>
-                    <div class="grid-form">
-                        <input type="text" id="c-nome" placeholder="Razão Social *">
-                        <input type="text" id="c-cnpj" placeholder="CNPJ">
-                    </div>
-                    <div class="grid-form">
-                        <select id="c-rep">
-                            <option>PLAXMETAL PR</option><option>PLAXMETAL MS/MT</option>
-                            <option>LUNASA</option><option>GEBB</option><option>ARIAM</option>
+                <div class="card" style="text-align:center">
+                    <label>Filtrar Período e Representada</label>
+                    <div style="display:flex; gap:10px; margin-top:5px;">
+                        <input type="month" id="f-mes" onchange="loadBI()" style="margin:0">
+                        <select id="f-rep" onchange="loadBI()" style="margin:0">
+                            <option value="">Todas</option>
+                            <option>PLAXMETAL PR</option><option>PLAXMETAL MS/MT</option><option>LUNASA</option><option>GEBB</option><option>ARIAM</option>
                         </select>
-                        <input type="text" id="c-contato" placeholder="Contato">
                     </div>
-                    <div class="grid-form">
-                        <input type="text" id="c-whats" placeholder="WhatsApp">
-                        <input type="text" id="c-end" placeholder="Endereço / Cidade">
-                    </div>
-                    <textarea id="c-obs" placeholder="Observações..." rows="2"></textarea>
-                    <button class="btn" onclick="salvarCliente()">SALVAR FICHA</button>
                 </div>
-                <div id="lista-clientes"></div>
-            </section>
+            </div>
+            <div class="card">
+                <canvas id="chart"></canvas>
+            </div>
+        </section>
 
-            <section id="tab-fat" class="hidden">
-                <div class="card">
-                    <h3>Lançar Venda</h3>
-                    <div class="grid-form">
-                        <input type="date" id="v-data">
-                        <input type="number" id="v-valor" placeholder="Valor (R$)">
+        <section id="s-cli" class="hidden">
+            <div class="card">
+                <h3 style="margin-top:0">Nova Ficha de Cliente</h3>
+                <div class="row">
+                    <div><label>Razão Social</label><input type="text" id="c_nome"></div>
+                    <div><label>CNPJ</label><input type="text" id="c_cnpj"></div>
+                    <div><label>Representada</label>
+                        <select id="c_rep">
+                            <option>PLAXMETAL PR</option><option>PLAXMETAL MS/MT</option><option>LUNASA</option><option>GEBB</option><option>ARIAM</option>
+                        </select>
                     </div>
-                    <div class="grid-form">
-                        <input type="text" id="v-cli" placeholder="Nome do Cliente">
-                        <input type="text" id="v-nf" placeholder="Nota Fiscal">
-                    </div>
-                    <select id="v-rep">
-                        <option>PLAXMETAL PR</option><option>PLAXMETAL MS/MT</option>
-                        <option>LUNASA</option><option>GEBB</option><option>ARIAM</option>
-                    </select>
-                    <button class="btn" onclick="salvarVenda()">REGISTRAR VENDA</button>
                 </div>
-                <div class="card">
-                    <table style="width:100%; border-collapse:collapse;" id="tabela-vendas"></table>
+                <div class="row">
+                    <div><label>WhatsApp</label><input type="text" id="c_whats"></div>
+                    <div><label>Contato</label><input type="text" id="c_cont"></div>
+                    <div><label>Cidade/Endereço</label><input type="text" id="c_end"></div>
                 </div>
-            </section>
+                <label>Observações</label><textarea id="c_obs" rows="2"></textarea>
+                <button class="btn" style="margin-top:10px" onclick="addCli()">SALVAR CLIENTE</button>
+            </div>
+            <div id="list-cli"></div>
+        </section>
 
-        </div>
+        <section id="s-fat" class="hidden">
+            <div class="card">
+                <h3 style="margin-top:0">Lançar Nova Venda</h3>
+                <div class="row">
+                    <div style="flex:0.5"><label>Data</label><input type="date" id="v_data"></div>
+                    <div style="flex:1.5"><label>Cliente</label><input type="text" id="v_cli" placeholder="Nome do cliente..."></div>
+                    <div style="flex:1"><label>Valor R$</label><input type="number" id="v_val" step="0.01"></div>
+                </div>
+                <div class="row">
+                    <div style="flex:1"><label>Representada</label>
+                        <select id="v_rep">
+                            <option>PLAXMETAL PR</option><option>PLAXMETAL MS/MT</option><option>LUNASA</option><option>GEBB</option><option>ARIAM</option>
+                        </select>
+                    </div>
+                    <div style="flex:1"><label>Nº Nota Fiscal</label><input type="text" id="v_nf"></div>
+                    <div style="flex:0.5; display:flex; align-items:flex-end;"><button class="btn" onclick="addVenda()">LANÇAR</button></div>
+                </div>
+            </div>
+            <div class="card">
+                <h3 style="margin-top:0; font-size:16px;">Últimos Lançamentos</h3>
+                <table id="t-vendas">
+                    <thead><tr><th>DATA</th><th>CLIENTE / REP</th><th>VALOR</th><th>NF</th><th></th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
     </div>
+</div>
 
-    <script>
-        // --- CONFIGURAÇÃO ---
-        const SB_URL = "https://abjqrorlzkmbtiqoooxb.supabase.co";
-        const SB_KEY = "sb_publishable_89VYMYncTckOQdDyiKXpuQ_AewcuCE4";
-        const sb = supabase.createClient(SB_URL, SB_KEY);
-        let chartInstance = null;
+<script>
+    const URL = "https://abjqrorlzkmbtiqoooxb.supabase.co";
+    const KEY = "sb_publishable_89VYMYncTckOQdDyiKXpuQ_AewcuCE4";
+    const sb = supabase.createClient(URL, KEY);
+    let myChart = null;
 
-        // --- SISTEMA DE LOGIN INTELIGENTE ---
-        // Verifica se já existe login ao abrir a página
-        window.onload = async () => {
-            const { data: { session } } = await sb.auth.getSession();
-            if (session) {
-                mostrarApp();
-            } else {
-                document.getElementById('login-screen').classList.remove('hidden');
-            }
-        };
-
-        async function fazerLogin() {
-            const btn = document.getElementById('btn-entrar');
-            const msg = document.getElementById('msg-erro');
-            btn.innerText = "Entrando...";
-            btn.disabled = true;
-
-            const { data, error } = await sb.auth.signInWithPassword({
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value
-            });
-
-            if (error) {
-                msg.innerText = "Erro: " + error.message;
-                btn.innerText = "ENTRAR";
-                btn.disabled = false;
-            } else {
-                mostrarApp();
-            }
-        }
-
-        async function sair() {
-            await sb.auth.signOut();
-            location.reload();
-        }
-
-        function mostrarApp() {
+    // LOGIN & SESSÃO
+    async function checkUser() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session) {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
-            // Inicia valores padrão
-            document.getElementById('bi-mes').value = new Date().toISOString().slice(0, 7);
-            document.getElementById('v-data').valueAsDate = new Date();
-            carregarBI();
-            carregarClientes();
-            carregarVendas();
+            init();
         }
+    }
+    window.onload = checkUser;
 
-        // --- FUNÇÕES DE VENDAS ---
-        async function salvarVenda() {
-            const valor = document.getElementById('v-valor').value;
-            const cliente = document.getElementById('v-cli').value;
+    async function login() {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('pass').value;
+        const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+        if (error) alert("Erro: " + error.message);
+        else location.reload();
+    }
 
-            if (!valor || !cliente) return alert("Preencha Valor e Cliente!");
+    async function logout() { await sb.auth.signOut(); location.reload(); }
 
-            const { error } = await sb.from('vendas').insert([{
-                data_venda: document.getElementById('v-data').value,
-                cliente_nome: cliente,
-                valor: parseFloat(valor),
-                nf: document.getElementById('v-nf').value,
-                representada: document.getElementById('v-rep').value
-            }]);
+    function init() {
+        document.getElementById('f-mes').value = new Date().toISOString().slice(0, 7);
+        document.getElementById('v_data').valueAsDate = new Date();
+        loadBI(); loadCli(); loadVendas();
+    }
 
-            if (error) {
-                alert("Erro ao salvar venda: " + error.message);
-                console.error(error); // Mostra o erro real no console se houver
-            } else {
-                alert("Venda Registrada!");
-                document.getElementById('v-valor').value = '';
-                document.getElementById('v-nf').value = '';
-                carregarVendas();
-                carregarBI();
-            }
+    // FATURAMENTO
+    async function addVenda() {
+        const val = document.getElementById('v_val').value;
+        const cli = document.getElementById('v_cli').value;
+        if (!val || !cli) return alert("Preencha cliente e valor!");
+
+        const { error } = await sb.from('vendas').insert([{
+            data_venda: document.getElementById('v_data').value,
+            cliente_nome: cli,
+            valor: parseFloat(val),
+            representada: document.getElementById('v_rep').value,
+            nf: document.getElementById('v_nf').value
+        }]);
+
+        if (error) alert("Erro ao salvar!");
+        else {
+            // Lógica para aparecer direto no BI:
+            document.getElementById('v_val').value = '';
+            document.getElementById('v_cli').value = '';
+            document.getElementById('v_nf').value = '';
+            await loadVendas(); // Atualiza lista
+            await loadBI();     // ATUALIZA O BI NA HORA!
+            alert("Venda registrada e BI atualizado!");
         }
+    }
 
-        async function carregarVendas() {
-            const { data } = await sb.from('vendas').select('*').order('data_venda', {ascending: false}).limit(20);
-            const tabela = document.getElementById('tabela-vendas');
-            tabela.innerHTML = `
-                <tr style="background:#eee; text-align:left;">
-                    <th style="padding:10px">Data</th><th>Cliente</th><th>Valor</th><th></th>
-                </tr>
-            `;
-            data?.forEach(v => {
-                tabela.innerHTML += `
-                    <tr style="border-bottom:1px solid #ddd">
-                        <td style="padding:10px">${v.data_venda.split('-').reverse().join('/')}</td>
-                        <td>${v.cliente_nome}<br><small>${v.representada}</small></td>
-                        <td style="color:var(--bordo); font-weight:bold">R$ ${v.valor.toLocaleString('pt-BR')}</td>
-                        <td><button onclick="deletar('vendas','${v.id}')" style="color:red; border:none; background:none; cursor:pointer">X</button></td>
-                    </tr>
-                `;
-            });
-        }
+    async function loadVendas() {
+        const { data } = await sb.from('vendas').select('*').order('data_venda', {ascending: false}).limit(10);
+        const tbody = document.querySelector('#t-vendas tbody');
+        tbody.innerHTML = (data || []).map(v => `
+            <tr>
+                <td>${v.data_venda.split('-').reverse().join('/')}</td>
+                <td><strong>${v.cliente_nome}</strong><br><small style="color:#999">${v.representada}</small></td>
+                <td class="val-venda">R$ ${v.valor.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                <td>${v.nf || '-'}</td>
+                <td><button onclick="del('vendas','${v.id}', loadVendas)" style="background:none; border:none; cursor:pointer">🗑️</button></td>
+            </tr>
+        `).join('');
+    }
 
-        // --- FUNÇÕES DE CLIENTES ---
-        async function salvarCliente() {
-            const nome = document.getElementById('c-nome').value;
-            if(!nome) return alert("Preencha a Razão Social");
+    // BI
+    async function loadBI() {
+        const mes = document.getElementById('f-mes').value;
+        const rep = document.getElementById('f-rep').value;
+        let query = sb.from('vendas').select('*').gte('data_venda', `${mes}-01`).lte('data_venda', `${mes}-31`);
+        if (rep) query = query.eq('representada', rep);
 
-            const { error } = await sb.from('clientes').insert([{
-                nome: nome,
-                cnpj: document.getElementById('c-cnpj').value,
-                representada: document.getElementById('c-rep').value,
-                contato: document.getElementById('c-contato').value,
-                whatsapp: document.getElementById('c-whats').value,
-                endereco: document.getElementById('c-end').value,
-                observacoes: document.getElementById('c-obs').value
-            }]);
+        const { data } = await query;
+        const total = (data || []).reduce((acc, v) => acc + v.valor, 0);
+        document.getElementById('tot-mes').innerText = total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
 
-            if(error) alert("Erro: " + error.message);
-            else {
-                alert("Cliente Salvo!");
-                document.querySelectorAll('#tab-cli input').forEach(i => i.value = '');
-                carregarClientes();
-            }
-        }
+        // Gráfico de evolução
+        const dias = {};
+        (data || []).forEach(v => dias[v.data_venda] = (dias[v.data_venda] || 0) + v.valor);
+        const labels = Object.keys(dias).sort().map(d => d.split('-')[2]);
+        const valores = Object.keys(dias).sort().map(d => dias[d]);
 
-        async function carregarClientes() {
-            const { data } = await sb.from('clientes').select('*').order('nome');
-            const lista = document.getElementById('lista-clientes');
-            lista.innerHTML = '';
-            data?.forEach(c => {
-                lista.innerHTML += `
-                    <div class="card" style="border-left:5px solid var(--gold); border-top:none;">
-                        <div style="display:flex; justify-content:space-between">
-                            <strong>${c.nome}</strong>
-                            <button onclick="deletar('clientes','${c.id}')" style="color:red; border:none; background:none; cursor:pointer">🗑️</button>
-                        </div>
-                        <small style="background:#eee; padding:2px 5px; border-radius:4px;">${c.representada}</small>
-                        <p style="font-size:13px; color:#555; margin:5px 0">
-                            📞 ${c.contato || '-'} | ${c.whatsapp || '-'}<br>
-                            📍 ${c.endereco || '-'}
-                        </p>
-                    </div>
-                `;
-            });
-        }
+        if (myChart) myChart.destroy();
+        myChart = new Chart(document.getElementById('chart'), {
+            type: 'line',
+            data: { labels, datasets: [{ label:'Faturamento Diário', data: valores, borderColor:'#800020', tension:0.4, fill:true, backgroundColor:'rgba(128,0,32,0.1)' }] }
+        });
+    }
 
-        // --- BI E UTILITÁRIOS ---
-        async function carregarBI() {
-            const mes = document.getElementById('bi-mes').value;
-            const rep = document.getElementById('bi-rep').value;
-            let query = sb.from('vendas').select('*').gte('data_venda', `${mes}-01`).lte('data_venda', `${mes}-31`);
-            
-            if(rep) query = query.eq('representada', rep);
+    // CLIENTES
+    async function addCli() {
+        const nome = document.getElementById('c_nome').value;
+        if (!nome) return alert("Razão Social é obrigatória!");
+        await sb.from('clientes').insert([{
+            nome, cnpj: document.getElementById('c_cnpj').value, representada: document.getElementById('c_rep').value,
+            whatsapp: document.getElementById('c_whats').value, contato: document.getElementById('c_cont').value,
+            endereco: document.getElementById('c_end').value, observacoes: document.getElementById('c_obs').value
+        }]);
+        document.querySelectorAll('#s-cli input, #s-cli textarea').forEach(i => i.value = '');
+        loadCli();
+    }
 
-            const { data } = await query;
-            const total = data?.reduce((acc, v) => acc + v.valor, 0) || 0;
-            
-            document.getElementById('kpi-total').innerText = total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+    async function loadCli() {
+        const { data } = await sb.from('clientes').select('*').order('nome');
+        document.getElementById('list-cli').innerHTML = (data || []).map(c => `
+            <div class="card" style="border-left:8px solid var(--gold); border-top:none; padding:15px;">
+                <div style="display:flex; justify-content:space-between">
+                    <strong>${c.nome}</strong>
+                    <button onclick="del('clientes','${c.id}', loadCli)" style="background:none; border:none; color:red; cursor:pointer">🗑️</button>
+                </div>
+                <div style="font-size:12px; color:#666; margin-top:5px;">
+                    ${c.representada} | CNPJ: ${c.cnpj || '-'} | Contato: ${c.contato || '-'} | Zap: ${c.whatsapp || '-'}
+                </div>
+                ${c.observacoes ? `<div style="background:#f9f9f9; padding:8px; border-radius:5px; margin-top:10px; font-size:12px;">📝 ${c.observacoes}</div>` : ''}
+            </div>
+        `).join('');
+    }
 
-            // Gráfico
-            const dias = {};
-            data?.forEach(v => dias[v.data_venda] = (dias[v.data_venda]||0) + v.valor);
-            const labels = Object.keys(dias).sort().map(d => d.split('-')[2]);
-            const valores = Object.keys(dias).sort().map(d => dias[d]);
-
-            if(chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(document.getElementById('grafico-vendas'), {
-                type: 'line',
-                data: { labels: labels, datasets: [{ label: 'Vendas', data: valores, borderColor: '#800020', tension:0.3, fill:true, backgroundColor:'rgba(128,0,32,0.1)' }] }
-            });
-        }
-
-        async function deletar(tabela, id) {
-            if(confirm("Excluir?")) {
-                await sb.from(tabela).delete().eq('id', id);
-                location.reload();
-            }
-        }
-
-        function mudarAba(aba) {
-            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + aba).classList.remove('hidden');
-            document.getElementById('nav-' + aba).classList.add('active');
-        }
-    </script>
+    async function del(t, id, cb) { if (confirm("Excluir?")) { await sb.from(t).delete().eq('id', id); cb(); if(t==='vendas') loadBI(); } }
+    
+    function tab(t) {
+        document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById('s-' + t).classList.remove('hidden');
+        document.getElementById('n-' + t).classList.add('active');
+    }
+</script>
 </body>
 </html>
-
-
