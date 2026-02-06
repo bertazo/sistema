@@ -3,79 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bertazo | Gestão</title>
+    <title>Bertazo | Sistema de Gestão Estratégica</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💼</text></svg>">
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
     <style>
-        :root { --bordo: #800020; --gold: #b8860b; --bg: #f4f4f9; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; }
+        :root { --bordo: #800020; --gold: #b8860b; --bg: #f8f9fa; --card: #ffffff; --text: #2d3436; }
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
         .hidden { display: none !important; }
-        
+
         /* LOGIN */
-        #login-screen { position: fixed; inset: 0; background: var(--bordo); display: flex; justify-content: center; align-items: center; z-index: 9999; }
-        .login-card { background: white; padding: 40px; border-radius: 15px; width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
-        /* HEADER & NAV */
-        header { background: var(--bordo); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--gold); }
-        nav { background: white; display: flex; justify-content: center; border-bottom: 1px solid #ddd; }
-        nav button { background: none; border: none; padding: 15px 25px; cursor: pointer; font-weight: bold; color: #666; transition: 0.3s; }
+        #auth-screen { position: fixed; inset: 0; background: var(--bordo); display: flex; justify-content: center; align-items: center; z-index: 10000; }
+        .login-card { background: white; padding: 40px; border-radius: 20px; width: 350px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        .login-card h1 { color: var(--bordo); letter-spacing: 4px; margin-bottom: 5px; }
+
+        /* ESTRUTURA */
+        header { background: var(--bordo); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--gold); position: sticky; top: 0; z-index: 900; }
+        nav { background: white; display: flex; justify-content: center; border-bottom: 1px solid #ddd; position: sticky; top: 64px; z-index: 899; }
+        nav button { background: none; border: none; padding: 18px 25px; cursor: pointer; font-weight: 600; color: #636e72; font-size: 13px; text-transform: uppercase; transition: 0.3s; }
         nav button.active { color: var(--bordo); border-bottom: 3px solid var(--bordo); background: #fff5f7; }
 
-        .container { max-width: 1000px; margin: 20px auto; padding: 0 20px; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid var(--bordo); }
+        .container { max-width: 1300px; margin: 30px auto; padding: 0 30px; }
+        .card { background: var(--card); padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid var(--bordo); }
         
-        /* FORMULÁRIOS */
-        .row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
-        .row > div { flex: 1; min-width: 200px; }
-        input, select, textarea { padding: 12px; border: 1px solid #ddd; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 14px; margin-top: 5px; }
-        label { font-size: 12px; font-weight: bold; color: #555; text-transform: uppercase; }
-        .btn { background: var(--bordo); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
-        .btn:hover { background: #5a0016; transform: translateY(-2px); }
+        /* FORMULÁRIOS EXECUTIVOS */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        label { display: block; font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #dfe6e9; border-radius: 8px; font-size: 14px; transition: 0.2s; }
+        input:focus { border-color: var(--bordo); outline: none; box-shadow: 0 0 0 3px rgba(128,0,32,0.1); }
+        .btn { background: var(--bordo); color: white; border: none; padding: 14px 25px; border-radius: 8px; cursor: pointer; font-weight: 700; transition: 0.3s; width: 100%; }
+        .btn:hover { background: #5a0016; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(128,0,32,0.2); }
+        .btn-gold { background: var(--gold); }
 
-        /* TABELA DE FATURAMENTO */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; color: #888; font-size: 12px; padding: 10px; border-bottom: 2px solid #eee; }
-        td { padding: 12px 10px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
-        .val-venda { font-weight: bold; color: var(--bordo); }
+        /* DASHBOARD / BI */
+        .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .kpi-card { background: white; padding: 25px; border-radius: 12px; border-bottom: 4px solid var(--gold); text-align: center; }
+        .kpi-val { font-size: 28px; font-weight: 700; color: var(--bordo); margin-top: 10px; }
+
+        /* TABELAS */
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th { text-align: left; padding: 15px; background: #f9f9f9; color: #888; text-transform: uppercase; font-size: 11px; }
+        td { padding: 15px; border-bottom: 1px solid #eee; }
+        tr:hover { background: #fffcfd; }
+
+        /* ORÇAMENTO & PDF */
+        @media print { .no-print { display: none !important; } .print-only { display: block !important; } body { background: white; } }
+        .print-only { display: none; }
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="login-screen">
+<div id="auth-screen">
     <div class="login-card">
-        <h1 style="color:var(--bordo); margin:0;">BERTAZO</h1>
-        <p style="font-size:12px; margin-bottom:20px;">ACESSO RESTRITO</p>
-        <input type="email" id="email" placeholder="E-mail">
-        <input type="password" id="pass" placeholder="Senha">
-        <button class="btn" onclick="login()">ENTRAR</button>
+        <h1>BERTAZO</h1>
+        <p style="color:#666; margin-bottom:30px">SISTEMA DE GESTÃO ESTRATÉGICA</p>
+        <input type="email" id="email" placeholder="E-mail" style="margin-bottom:15px">
+        <input type="password" id="pass" placeholder="Senha" style="margin-bottom:25px">
+        <button class="btn" onclick="handleLogin()">ENTRAR</button>
+        <div id="login-err" style="color:red; font-size:12px; margin-top:15px"></div>
     </div>
 </div>
 
 <div id="app" class="hidden">
     <header>
-        <div style="font-weight: bold; letter-spacing: 1px;">BERTAZO | GESTÃO</div>
-        <button onclick="logout()" style="background:none; border:1px solid white; color:white; padding:5px 12px; border-radius:4px; cursor:pointer; font-size:11px;">SAIR</button>
+        <div style="font-weight: 700; letter-spacing: 3px; font-size: 20px;">BERTAZO</div>
+        <div style="display:flex; align-items:center; gap:20px">
+            <span id="user-mail" style="font-size:12px; opacity:0.8"></span>
+            <button onclick="logout()" style="background:none; border:1px solid white; color:white; border-radius:5px; cursor:pointer; padding:5px 15px">Sair</button>
+        </div>
     </header>
 
-    <nav>
-        <button id="n-bi" class="active" onclick="tab('bi')">DASHBOARD BI</button>
-        <button id="n-cli" onclick="tab('cli')">CLIENTES</button>
-        <button id="n-fat" onclick="tab('fat')">FATURAMENTO</button>
+    <nav class="no-print">
+        <button id="n-bi" class="active" onclick="tab('bi')">BI & Analytics</button>
+        <button id="n-cli" onclick="tab('cli')">Clientes</button>
+        <button id="n-fat" onclick="tab('fat')">Faturamento</button>
+        <button id="n-lic" onclick="tab('lic')">Licitações/Pedidos</button>
+        <button id="n-orc" onclick="tab('orc')">Orçamentos</button>
     </nav>
 
     <div class="container">
+        
         <section id="s-bi">
-            <div class="row">
-                <div class="card" style="text-align:center">
-                    <label>Faturamento Mensal</label>
-                    <div id="tot-mes" style="font-size:28px; font-weight:bold; color:var(--bordo); margin-top:5px;">R$ 0,00</div>
-                </div>
-                <div class="card" style="text-align:center">
-                    <label>Filtrar Período e Representada</label>
-                    <div style="display:flex; gap:10px; margin-top:5px;">
-                        <input type="month" id="f-mes" onchange="loadBI()" style="margin:0">
-                        <select id="f-rep" onchange="loadBI()" style="margin:0">
+            <div class="kpi-row">
+                <div class="kpi-card"><label>Faturamento Mensal</label><div id="kpi-fat" class="kpi-val">R$ 0,00</div></div>
+                <div class="kpi-card"><label>Comissão Estimada</label><div id="kpi-com" class="kpi-val">R$ 0,00</div></div>
+                <div class="kpi-card">
+                    <label>Filtros</label>
+                    <div style="display:flex; gap:10px; margin-top:10px">
+                        <input type="month" id="f-mes" onchange="loadBI()">
+                        <select id="f-rep" onchange="loadBI()">
                             <option value="">Todas</option>
                             <option>PLAXMETAL PR</option><option>PLAXMETAL MS/MT</option><option>LUNASA</option><option>GEBB</option><option>ARIAM</option>
                         </select>
@@ -83,195 +105,249 @@
                 </div>
             </div>
             <div class="card">
-                <canvas id="chart"></canvas>
+                <canvas id="mainChart" height="100"></canvas>
             </div>
         </section>
 
         <section id="s-cli" class="hidden">
             <div class="card">
-                <h3 style="margin-top:0">Nova Ficha de Cliente</h3>
-                <div class="row">
-                    <div><label>Razão Social</label><input type="text" id="c_nome"></div>
-                    <div><label>CNPJ</label><input type="text" id="c_cnpj"></div>
+                <h3>Cadastro de Ficha Completa</h3>
+                <div class="grid">
+                    <div><label>Razão Social</label><input type="text" id="c-nome"></div>
+                    <div><label>CNPJ</label><input type="text" id="c-cnpj"></div>
                     <div><label>Representada</label>
-                        <select id="c_rep">
+                        <select id="c-rep">
                             <option>PLAXMETAL PR</option><option>PLAXMETAL MS/MT</option><option>LUNASA</option><option>GEBB</option><option>ARIAM</option>
                         </select>
                     </div>
                 </div>
-                <div class="row">
-                    <div><label>WhatsApp</label><input type="text" id="c_whats"></div>
-                    <div><label>Contato</label><input type="text" id="c_cont"></div>
-                    <div><label>Cidade/Endereço</label><input type="text" id="c_end"></div>
+                <div class="grid">
+                    <div><label>WhatsApp</label><input type="text" id="c-whats"></div>
+                    <div><label>Contato</label><input type="text" id="c-contato"></div>
+                    <div><label>Endereço</label><input type="text" id="c-end"></div>
                 </div>
-                <label>Observações</label><textarea id="c_obs" rows="2"></textarea>
-                <button class="btn" style="margin-top:10px" onclick="addCli()">SALVAR CLIENTE</button>
+                <label>Observações Estratégicas</label>
+                <textarea id="c-obs" rows="3"></textarea>
+                <button class="btn" style="margin-top:20px" onclick="saveCli()">Salvar Cliente</button>
             </div>
-            <div id="list-cli"></div>
+            <div id="cli-list"></div>
         </section>
 
         <section id="s-fat" class="hidden">
             <div class="card">
-                <h3 style="margin-top:0">Lançar Nova Venda</h3>
-                <div class="row">
-                    <div style="flex:0.5"><label>Data</label><input type="date" id="v_data"></div>
-                    <div style="flex:1.5"><label>Cliente</label><input type="text" id="v_cli" placeholder="Nome do cliente..."></div>
-                    <div style="flex:1"><label>Valor R$</label><input type="number" id="v_val" step="0.01"></div>
-                </div>
-                <div class="row">
-                    <div style="flex:1"><label>Representada</label>
-                        <select id="v_rep">
+                <h3>Lançar Faturamento Diário</h3>
+                <div class="grid">
+                    <div><label>Data</label><input type="date" id="v-data"></div>
+                    <div><label>Cliente</label><input type="text" id="v-cli" placeholder="Buscar cliente..."></div>
+                    <div><label>Representada</label>
+                        <select id="v-rep">
                             <option>PLAXMETAL PR</option><option>PLAXMETAL MS/MT</option><option>LUNASA</option><option>GEBB</option><option>ARIAM</option>
                         </select>
                     </div>
-                    <div style="flex:1"><label>Nº Nota Fiscal</label><input type="text" id="v_nf"></div>
-                    <div style="flex:0.5; display:flex; align-items:flex-end;"><button class="btn" onclick="addVenda()">LANÇAR</button></div>
+                    <div><label>Valor R$</label><input type="number" id="v-val"></div>
+                    <div><label>NF</label><input type="text" id="v-nf"></div>
+                </div>
+                <button class="btn" onclick="saveVenda()">Registrar Faturamento</button>
+            </div>
+            <div class="card"><div class="table-wrapper"><table id="t-vendas"></table></div></div>
+        </section>
+
+        <section id="s-lic" class="hidden">
+            <div class="card">
+                <h3>Controle Interno de Pedidos / Licitações</h3>
+                <div class="grid">
+                    <div><label>Objeto/Item</label><input type="text" id="l-obj"></div>
+                    <div><label>Cliente/Órgão</label><input type="text" id="l-cli"></div>
+                    <div><label>Valor Total</label><input type="number" id="l-val"></div>
+                    <div><label>% Comissão</label><input type="number" id="l-pct" value="5"></div>
+                    <div><label>Status</label>
+                        <select id="l-status">
+                            <option>Pendente</option><option>Vencida</option><option>Perdida</option><option>Faturada</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn" onclick="saveLic()">Lançar na Planilha</button>
+            </div>
+            <div class="card"><div class="table-wrapper"><table id="t-lic"></table></div></div>
+        </section>
+
+        <section id="s-orc" class="hidden">
+            <div class="card no-print">
+                <h3>Gerador de Orçamento Profissional</h3>
+                <div class="grid">
+                    <div style="flex:2"><label>Cliente</label><input type="text" id="o-cli"></div>
+                    <div><label>Validade</label><input type="text" id="o-val" value="10 dias"></div>
+                </div>
+                <div style="background:#f9f9f9; padding:20px; border-radius:10px; margin-bottom:20px">
+                    <div class="grid">
+                        <div style="flex:2"><label>Produto/Serviço</label><input type="text" id="oi-desc"></div>
+                        <div><label>Qtd</label><input type="number" id="oi-qtd" value="1"></div>
+                        <div><label>Unitário R$</label><input type="number" id="oi-preco"></div>
+                        <div style="display:flex; align-items:flex-end"><button class="btn btn-gold" onclick="addOrcItem()">+</button></div>
+                    </div>
+                </div>
+                <table id="t-orc-previa"></table>
+                <button class="btn" style="margin-top:20px" onclick="printOrc()">Gerar PDF para Cliente</button>
+            </div>
+
+            <div id="print-area" class="print-only" style="padding:40px; background:white;">
+                <div style="display:flex; justify-content:space-between; border-bottom:4px solid var(--bordo); padding-bottom:20px">
+                    <div><h1 style="color:var(--bordo); margin:0">BERTAZO</h1><p>Representações Comerciais Especializadas</p></div>
+                    <div style="text-align:right"><h2 style="margin:0">ORÇAMENTO</h2><p id="p-data"></p></div>
+                </div>
+                <div style="margin:30px 0"><strong>CLIENTE:</strong> <span id="p-cli"></span></div>
+                <table id="p-table" style="width:100%"></table>
+                <div style="text-align:right; margin-top:40px">
+                    <div style="font-size:22px; font-weight:700">TOTAL: <span id="p-total"></span></div>
+                    <p style="font-size:12px; margin-top:20px">Validade da Proposta: <span id="p-val"></span></p>
                 </div>
             </div>
-            <div class="card">
-                <h3 style="margin-top:0; font-size:16px;">Últimos Lançamentos</h3>
-                <table id="t-vendas">
-                    <thead><tr><th>DATA</th><th>CLIENTE / REP</th><th>VALOR</th><th>NF</th><th></th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
         </section>
+
     </div>
 </div>
 
 <script>
-    const URL = "https://abjqrorlzkmbtiqoooxb.supabase.co";
-    const KEY = "sb_publishable_89VYMYncTckOQdDyiKXpuQ_AewcuCE4";
-    const sb = supabase.createClient(URL, KEY);
-    let myChart = null;
+    // --- CONFIGURAÇÃO ---
+    const SB_URL = "https://abjqrorlzkmbtiqoooxb.supabase.co";
+    const SB_KEY = "sb_publishable_89VYMYncTckOQdDyiKXpuQ_AewcuCE4";
+    const sb = supabase.createClient(SB_URL, SB_KEY);
+    let chart;
 
-    // LOGIN & SESSÃO
-    async function checkUser() {
+    // --- LOGIN ---
+    async function handleLogin() {
+        const { data, error } = await sb.auth.signInWithPassword({
+            email: document.getElementById('email').value,
+            password: document.getElementById('pass').value
+        });
+        if(error) document.getElementById('login-err').innerText = "Acesso negado.";
+        else checkSession();
+    }
+
+    async function checkSession() {
         const { data: { session } } = await sb.auth.getSession();
-        if (session) {
-            document.getElementById('login-screen').classList.add('hidden');
+        if(session) {
+            document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
+            document.getElementById('user-mail').innerText = session.user.email;
             init();
         }
     }
-    window.onload = checkUser;
-
-    async function login() {
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('pass').value;
-        const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-        if (error) alert("Erro: " + error.message);
-        else location.reload();
-    }
-
+    window.onload = checkSession;
     async function logout() { await sb.auth.signOut(); location.reload(); }
 
+    // --- CORE ---
     function init() {
         document.getElementById('f-mes').value = new Date().toISOString().slice(0, 7);
-        document.getElementById('v_data').valueAsDate = new Date();
-        loadBI(); loadCli(); loadVendas();
+        document.getElementById('v-data').valueAsDate = new Date();
+        loadBI(); loadCli(); loadVendas(); loadLic();
     }
 
-    // FATURAMENTO
-    async function addVenda() {
-        const val = document.getElementById('v_val').value;
-        const cli = document.getElementById('v_cli').value;
-        if (!val || !cli) return alert("Preencha cliente e valor!");
-
-        const { error } = await sb.from('vendas').insert([{
-            data_venda: document.getElementById('v_data').value,
-            cliente_nome: cli,
-            valor: parseFloat(val),
-            representada: document.getElementById('v_rep').value,
-            nf: document.getElementById('v_nf').value
-        }]);
-
-        if (error) alert("Erro ao salvar!");
-        else {
-            // Lógica para aparecer direto no BI:
-            document.getElementById('v_val').value = '';
-            document.getElementById('v_cli').value = '';
-            document.getElementById('v_nf').value = '';
-            await loadVendas(); // Atualiza lista
-            await loadBI();     // ATUALIZA O BI NA HORA!
-            alert("Venda registrada e BI atualizado!");
-        }
+    function tab(t) {
+        document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById('s-'+t).classList.remove('hidden');
+        document.getElementById('n-'+t).classList.add('active');
     }
 
-    async function loadVendas() {
-        const { data } = await sb.from('vendas').select('*').order('data_venda', {ascending: false}).limit(10);
-        const tbody = document.querySelector('#t-vendas tbody');
-        tbody.innerHTML = (data || []).map(v => `
-            <tr>
-                <td>${v.data_venda.split('-').reverse().join('/')}</td>
-                <td><strong>${v.cliente_nome}</strong><br><small style="color:#999">${v.representada}</small></td>
-                <td class="val-venda">R$ ${v.valor.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                <td>${v.nf || '-'}</td>
-                <td><button onclick="del('vendas','${v.id}', loadVendas)" style="background:none; border:none; cursor:pointer">🗑️</button></td>
-            </tr>
-        `).join('');
-    }
-
-    // BI
-    async function loadBI() {
-        const mes = document.getElementById('f-mes').value;
-        const rep = document.getElementById('f-rep').value;
-        let query = sb.from('vendas').select('*').gte('data_venda', `${mes}-01`).lte('data_venda', `${mes}-31`);
-        if (rep) query = query.eq('representada', rep);
-
-        const { data } = await query;
-        const total = (data || []).reduce((acc, v) => acc + v.valor, 0);
-        document.getElementById('tot-mes').innerText = total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
-
-        // Gráfico de evolução
-        const dias = {};
-        (data || []).forEach(v => dias[v.data_venda] = (dias[v.data_venda] || 0) + v.valor);
-        const labels = Object.keys(dias).sort().map(d => d.split('-')[2]);
-        const valores = Object.keys(dias).sort().map(d => dias[d]);
-
-        if (myChart) myChart.destroy();
-        myChart = new Chart(document.getElementById('chart'), {
-            type: 'line',
-            data: { labels, datasets: [{ label:'Faturamento Diário', data: valores, borderColor:'#800020', tension:0.4, fill:true, backgroundColor:'rgba(128,0,32,0.1)' }] }
-        });
-    }
-
-    // CLIENTES
-    async function addCli() {
-        const nome = document.getElementById('c_nome').value;
-        if (!nome) return alert("Razão Social é obrigatória!");
+    // --- CLIENTES ---
+    async function saveCli() {
+        const nome = document.getElementById('c-nome').value;
+        if(!nome) return alert("Razão Social obrigatória.");
         await sb.from('clientes').insert([{
-            nome, cnpj: document.getElementById('c_cnpj').value, representada: document.getElementById('c_rep').value,
-            whatsapp: document.getElementById('c_whats').value, contato: document.getElementById('c_cont').value,
-            endereco: document.getElementById('c_end').value, observacoes: document.getElementById('c_obs').value
+            nome, cnpj: document.getElementById('c-cnpj').value, representada: document.getElementById('c-rep').value,
+            whatsapp: document.getElementById('c-whats').value, contato: document.getElementById('c-contato').value,
+            endereco: document.getElementById('c-end').value, observacoes: document.getElementById('c-obs').value
         }]);
-        document.querySelectorAll('#s-cli input, #s-cli textarea').forEach(i => i.value = '');
         loadCli();
     }
 
     async function loadCli() {
         const { data } = await sb.from('clientes').select('*').order('nome');
-        document.getElementById('list-cli').innerHTML = (data || []).map(c => `
-            <div class="card" style="border-left:8px solid var(--gold); border-top:none; padding:15px;">
+        document.getElementById('cli-list').innerHTML = (data || []).map(c => `
+            <div class="card" style="border-left:8px solid var(--gold); border-top:none; padding:20px">
                 <div style="display:flex; justify-content:space-between">
-                    <strong>${c.nome}</strong>
-                    <button onclick="del('clientes','${c.id}', loadCli)" style="background:none; border:none; color:red; cursor:pointer">🗑️</button>
+                    <strong style="color:var(--bordo); font-size:18px">${c.nome}</strong>
+                    <span class="status-badge" style="background:#eee">${c.representada}</span>
                 </div>
-                <div style="font-size:12px; color:#666; margin-top:5px;">
-                    ${c.representada} | CNPJ: ${c.cnpj || '-'} | Contato: ${c.contato || '-'} | Zap: ${c.whatsapp || '-'}
-                </div>
-                ${c.observacoes ? `<div style="background:#f9f9f9; padding:8px; border-radius:5px; margin-top:10px; font-size:12px;">📝 ${c.observacoes}</div>` : ''}
+                <p style="font-size:13px; margin:10px 0">CNPJ: ${c.cnpj} | Zap: ${c.whatsapp} | Contato: ${c.contato}</p>
+                <div style="font-size:12px; color:#666; background:#f4f4f4; padding:10px; border-radius:5px">${c.observacoes || 'Sem observações.'}</div>
             </div>
         `).join('');
     }
 
-    async function del(t, id, cb) { if (confirm("Excluir?")) { await sb.from(t).delete().eq('id', id); cb(); if(t==='vendas') loadBI(); } }
-    
-    function tab(t) {
-        document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-        document.getElementById('s-' + t).classList.remove('hidden');
-        document.getElementById('n-' + t).classList.add('active');
+    // --- FATURAMENTO & BI ---
+    async function saveVenda() {
+        const val = document.getElementById('v-val').value;
+        if(!val) return;
+        await sb.from('vendas').insert([{
+            data_venda: document.getElementById('v-data').value,
+            cliente_nome: document.getElementById('v-cli').value,
+            valor: parseFloat(val), representada: document.getElementById('v-rep').value,
+            nf: document.getElementById('v-nf').value
+        }]);
+        loadVendas(); loadBI();
+    }
+
+    async function loadBI() {
+        const mes = document.getElementById('f-mes').value;
+        const rep = document.getElementById('f-rep').value;
+        let q = sb.from('vendas').select('*').gte('data_venda', `${mes}-01`).lte('data_venda', `${mes}-31`);
+        if(rep) q = q.eq('representada', rep);
+        
+        const { data } = await q;
+        const total = (data || []).reduce((a, b) => a + b.valor, 0);
+        document.getElementById('kpi-fat').innerText = total.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+        document.getElementById('kpi-com').innerText = (total * 0.05).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+
+        const dias = {}; (data || []).forEach(v => dias[v.data_venda] = (dias[v.data_venda]||0)+v.valor);
+        if(chart) chart.destroy();
+        chart = new Chart(document.getElementById('mainChart'), {
+            type:'line', data:{ labels: Object.keys(dias).map(d=>d.split('-')[2]), datasets:[{label:'Vendas R$', data: Object.values(dias), borderColor:'#800020', tension:0.4, fill:true, backgroundColor:'rgba(128,0,32,0.05)'}]}
+        });
+    }
+
+    async function loadVendas() {
+        const { data } = await sb.from('vendas').select('*').order('data_venda', {ascending:false}).limit(10);
+        document.getElementById('t-vendas').innerHTML = `<thead><tr><th>Data</th><th>Cliente</th><th>Valor</th><th>Rep</th><th>NF</th></tr></thead>` +
+        (data || []).map(v => `<tr><td>${v.data_venda}</td><td>${v.cliente_nome}</td><td>R$ ${v.valor}</td><td>${v.representada}</td><td>${v.nf}</td></tr>`).join('');
+    }
+
+    // --- LICITAÇÕES ---
+    async function saveLic() {
+        await sb.from('licitacoes').insert([{
+            objeto: document.getElementById('l-obj').value, cliente: document.getElementById('l-cli').value,
+            valor_total: parseFloat(document.getElementById('l-val').value), 
+            comissao_pct: parseFloat(document.getElementById('l-pct').value),
+            status: document.getElementById('l-status').value
+        }]);
+        loadLic();
+    }
+
+    async function loadLic() {
+        const { data } = await sb.from('licitacoes').select('*').order('data_pedido', {ascending:false});
+        document.getElementById('t-lic').innerHTML = `<thead><tr><th>Data</th><th>Objeto</th><th>Cliente</th><th>Valor</th><th>Comissão</th><th>Status</th></tr></thead>` +
+        (data || []).map(l => `<tr><td>${l.data_pedido}</td><td>${l.objeto}</td><td>${l.cliente}</td><td>R$ ${l.valor_total}</td><td>R$ ${l.valor_total*(l.comissao_pct/100)}</td><td>${l.status}</td></tr>`).join('');
+    }
+
+    // --- ORÇAMENTO ---
+    let oItems = [];
+    function addOrcItem() {
+        oItems.push({ desc: document.getElementById('oi-desc').value, qtd: document.getElementById('oi-qtd').value, preco: document.getElementById('oi-preco').value });
+        renderOrc();
+    }
+    function renderOrc() {
+        const h = `<thead><tr><th>Qtd</th><th>Descrição</th><th>Unit.</th><th>Total</th></tr></thead>`;
+        const r = oItems.map(i => `<tr><td>${i.qtd}</td><td>${i.desc}</td><td>R$ ${i.preco}</td><td>R$ ${i.qtd*i.preco}</td></tr>`).join('');
+        document.getElementById('t-orc-previa').innerHTML = h+r;
+        document.getElementById('p-table').innerHTML = h+r;
+    }
+    function printOrc() {
+        document.getElementById('p-cli').innerText = document.getElementById('o-cli').value;
+        document.getElementById('p-val').innerText = document.getElementById('o-val').value;
+        document.getElementById('p-data').innerText = new Date().toLocaleDateString();
+        document.getElementById('p-total').innerText = oItems.reduce((a,b)=>a+(b.qtd*b.preco),0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+        window.print();
     }
 </script>
 </body>
